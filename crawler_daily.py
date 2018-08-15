@@ -308,27 +308,29 @@ class small_tools:
 app = TestApp("127.0.0.1", 7496, 35)
 tools = small_tools()
 
-mom_df = pd.read_csv("momentum_ranking.csv")
-stock_list = mom_df["Ticker"].tolist()
-
-
 Wrong_stock_list = []
+
+sp1500_df = pd.read_csv("sp1500_tickers.csv")
+nas_df = pd.read_csv("nas_tickers.csv")
+nas_tickers = nas_df["Ticker"].tolist()
+
+if len(Wrong_stock_list) == 0:
+    stock_list = sp1500_df["Ticker"].tolist()
+else:
+    stock_list = Wrong_stock_list
+
 n = 0
 for stock in stock_list:
+    if stock in nas_tickers:
+        ibcontract.primaryExchange = "NASDAQ"
     start = time.time()
     ibcontract = IBcontract()
     ibcontract.secType = "STK"
     ibcontract.lastTradeDateOrContractMonth = "201801"
     ibcontract.symbol = stock
     ibcontract.exchange = "SMART"
-    # ibcontract.primaryExchange = "NASDAQ"
+
     filename = stock + ".csv"
-    # ibcontract.secType = "IND"
-    # ibcontract.lastTradeDateOrContractMonth = "201801"
-    # ibcontract.symbol = stock
-    # ibcontract.exchange = "HKFE"
-    # ibcontract.primaryExchange = "NASDAQ"
-    # filename = stock + "_HK.csv"
     print(stock)
 
     resolved_ibcontract = app.resolve_ib_contract(ibcontract)
@@ -368,7 +370,7 @@ for stock in stock_list:
         # # print(historic_data)
         else:
             stock_df = pd.DataFrame(data=historic_data, columns=["Date", "Open", "High", "Low", "Close", "Volume"])
-            stock_df.to_csv("sp500_historical_data/{}_US.csv".format(stock))
+            stock_df.to_csv("sp500_historical_data/{}.csv".format(stock))
             end = time.time()
             print((end - start))
 
